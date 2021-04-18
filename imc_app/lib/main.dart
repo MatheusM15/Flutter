@@ -26,7 +26,7 @@ class _MyappState extends State<Myapp> {
             child: Text(
               'CALCULO DE IMC',
               style: TextStyle(
-                  color: Colors.amber,
+                  color: Colors.purple,
                   fontWeight: FontWeight.bold,
                   fontSize: 25),
             ),
@@ -38,7 +38,7 @@ class _MyappState extends State<Myapp> {
           child: Column(
             children: [
               TextField(
-                controller: valor,
+                controller: alt,
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
@@ -56,7 +56,7 @@ class _MyappState extends State<Myapp> {
                 height: 10,
               ),
               TextField(
-                controller: alt,
+                controller: valor,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
@@ -78,7 +78,7 @@ class _MyappState extends State<Myapp> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Cal(valor.text, alt.text)));
+                            builder: (context) => Cal(alt.text, valor.text)));
                   },
                   child: Text(
                     "CALCULAR IMC",

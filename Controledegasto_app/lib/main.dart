@@ -5,6 +5,7 @@ import 'dart:math';
 import 'components/tr_form.dart';
 import 'components/transaction_list.dart';
 import 'transaction.dart';
+import 'components/chart.dart';
 
 main() => runApp(MaterialApp(
       title: "App de financia",
@@ -12,7 +13,7 @@ main() => runApp(MaterialApp(
     ));
 
 class MyAppState extends State<MyApp> {
-  final _transactions = [
+  final List<Transaction> _transactions = [
     Transaction(
       id: 't1',
       title: 'Novo tenis de corrida',
@@ -23,9 +24,17 @@ class MyAppState extends State<MyApp> {
       id: 't2',
       title: 'Conta de luz',
       value: 211.30,
-      date: DateTime.now(),
+      date: DateTime.now().subtract(Duration(days: 4)),
     )
   ];
+  List<Transaction> get _recenTRansactions {
+    return _transactions.where((tr) {
+      return tr.date.isAfter(DateTime.now().subtract(
+        Duration(days: 7),
+      ));
+    }).toList();
+  }
+
   _addTranscation(String title, double value) {
     final newTransaction = Transaction(
         id: Random().nextDouble().toString(),
@@ -49,13 +58,22 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.purple, accentColor: Colors.amber),
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        accentColor: Colors.amber,
+        fontFamily: 'Quicksand',
+        appBarTheme: AppBarTheme(
+            textTheme: ThemeData.light().textTheme.copyWith(
+                headline6: TextStyle(
+                    fontFamily: 'OpenSans',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold))),
+      ),
       home: Scaffold(
         appBar: AppBar(
           title: Center(
               child: Text(
             "Despesas Pessoais",
-            style: TextStyle(color: Colors.amber, fontSize: 25),
           )),
           actions: [
             IconButton(
@@ -66,13 +84,7 @@ class MyAppState extends State<MyApp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                child: Card(
-                  color: Colors.blue,
-                  child: Text('teste'),
-                  elevation: 5,
-                ),
-              ),
+              Chart(_recenTRansactions),
               TransactionList(_transactions),
             ],
           ),

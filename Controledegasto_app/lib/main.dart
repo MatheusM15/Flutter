@@ -13,20 +13,8 @@ main() => runApp(MaterialApp(
     ));
 
 class MyAppState extends State<MyApp> {
-  final List<Transaction> _transactions = [
-    Transaction(
-      id: 't1',
-      title: 'Novo tenis de corrida',
-      value: 310.76,
-      date: DateTime.now(),
-    ),
-    Transaction(
-      id: 't2',
-      title: 'Conta de luz',
-      value: 211.30,
-      date: DateTime.now().subtract(Duration(days: 4)),
-    )
-  ];
+  final List<Transaction> _transactions = [];
+
   List<Transaction> get _recenTRansactions {
     return _transactions.where((tr) {
       return tr.date.isAfter(DateTime.now().subtract(
@@ -35,16 +23,24 @@ class MyAppState extends State<MyApp> {
     }).toList();
   }
 
-  _addTranscation(String title, double value) {
+  _addTranscation(String title, double value, DateTime date) {
     final newTransaction = Transaction(
         id: Random().nextDouble().toString(),
         title: title,
         value: value,
-        date: DateTime.now());
+        date: date);
     setState(() {
       _transactions.add(newTransaction);
     });
     Navigator.of(context).pop();
+  }
+
+  _deleteTransaction(String id) {
+    setState(() {
+      _transactions.removeWhere((tr) {
+        return tr.id == id;
+      });
+    });
   }
 
   _openFromModal(BuildContext context) {
@@ -67,7 +63,11 @@ class MyAppState extends State<MyApp> {
                 headline6: TextStyle(
                     fontFamily: 'OpenSans',
                     fontSize: 20,
-                    fontWeight: FontWeight.bold))),
+                    fontWeight: FontWeight.bold),
+                button: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ))),
       ),
       home: Scaffold(
         appBar: AppBar(
@@ -85,7 +85,7 @@ class MyAppState extends State<MyApp> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Chart(_recenTRansactions),
-              TransactionList(_transactions),
+              TransactionList(_transactions, _deleteTransaction),
             ],
           ),
         ),

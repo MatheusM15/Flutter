@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:udemy_projeto1/components/tr_form.dart';
 
 import 'dart:math';
+import 'dart:io';
 import 'components/tr_form.dart';
 import 'components/transaction_list.dart';
 import 'transaction.dart';
@@ -14,6 +17,7 @@ main() => runApp(MaterialApp(
 
 class MyAppState extends State<MyApp> {
   final List<Transaction> _transactions = [];
+  bool _showChart = false;
 
   List<Transaction> get _recenTRansactions {
     return _transactions.where((tr) {
@@ -53,6 +57,67 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    bool _isLandScape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    Widget _getIconButton(IconData icon, Function fn) {
+      return Platform.isIOS
+          ? GestureDetector(
+              onTap: fn,
+              child: Icon(icon),
+            )
+          : IconButton(icon: Icon(icon), onPressed: fn);
+    }
+
+    final actions = [
+      if (_isLandScape)
+        _getIconButton(
+          _showChart ? Icons.list : Icons.pie_chart,
+          () {
+            setState(() {
+              _showChart = !_showChart;
+            });
+          },
+        ),
+      _getIconButton(Icons.add, () => _openFromModal(context)),
+    ];
+
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text("Despesas Pessoais"),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: actions,
+            ),
+          )
+        : AppBar(
+            title: Center(
+                child: Text(
+              "Despesas Pessoais",
+            )),
+            actions: actions);
+
+    final availabeHeigh = MediaQuery.of(context).size.height -
+        appBar.preferredSize.height -
+        MediaQuery.of(context).padding.top;
+
+    final bodyPage = SafeArea(
+        child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          if (_showChart || !_isLandScape)
+            Container(
+                height: availabeHeigh * (_isLandScape ? 0.7 : 0.3),
+                child: Chart(_recenTRansactions)),
+          if (!_showChart || !_isLandScape)
+            Container(
+                height: availabeHeigh * 0.7,
+                child: TransactionList(_transactions, _deleteTransaction)),
+        ],
+      ),
+    ));
+
     return MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.purple,
@@ -69,32 +134,19 @@ class MyAppState extends State<MyApp> {
                   fontWeight: FontWeight.bold,
                 ))),
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Center(
-              child: Text(
-            "Despesas Pessoais",
-          )),
-          actions: [
-            IconButton(
-                icon: Icon(Icons.add), onPressed: () => _openFromModal(context))
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Chart(_recenTRansactions),
-              TransactionList(_transactions, _deleteTransaction),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () => _openFromModal(context),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
+      home: Platform.isIOS
+          ? CupertinoPageScaffold(navigationBar: appBar, child: bodyPage)
+          : Scaffold(
+              appBar: appBar,
+              body: bodyPage,
+              floatingActionButton: FloatingActionButton(
+                child: Icon(Icons.add),
+                onPressed: () => _openFromModal(context),
+              ),
+              floatingActionButtonLocation: Platform.isIOS
+                  ? Container()
+                  : FloatingActionButtonLocation.centerFloat,
+            ),
     );
   }
 }
